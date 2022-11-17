@@ -1,70 +1,103 @@
-# Getting Started with Create React App
+# Docker 部署前端之 CRA 版
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+-   [Dockerfile Reference](https://docs.docker.com/engine/reference/builder/)
+-   [Compose file Reference](https://docs.docker.com/compose/compose-file/compose-file-v3/)
 
-## Available Scripts
+另外，还有[Docker 部署前端之简单版](https://github.com/shfshanyue/simple-deploy)
 
-In the project directory, you can run:
+## [](https://github.com/shfshanyue/cra-deploy#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%A6%82%E8%BF%B0)配置文件概述
 
-### `npm start`
+### [](https://github.com/shfshanyue/cra-deploy#docker)Docker
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+-   [simple.Dockerfile](https://github.com/shfshanyue/cra-deploy/blob/master/simple.Dockerfile): 关于如何使用 Docker 进行最简化部署
+-   [router.Dockerfile](https://github.com/shfshanyue/cra-deploy/blob/master/router.Dockerfile): 关于如何使用 Docker 部署并进行 nginx 配置
+-   [oss.Dockerfile](https://github.com/shfshanyue/cra-deploy/blob/master/oss.Dockerfile): 关于如何使用 Docker 部署并将静态资源部署至 CDN
+-   [docker-compose.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/docker-compose.yaml): 关于如何使用 Docker 部署前端从简单到复杂
+-   [domain.docker-compose.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/domain.docker-compose.yaml): 关于如何使用 Docker 进行部署并配置域名
+-   [preview.docker-compose.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/preview.docker-compose.yaml): 关于如何使用 Docker 进行 Preview 部署
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### [](https://github.com/shfshanyue/cra-deploy#ci)CI
 
-### `npm test`
+-   [ci.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/.github/workflows/ci.yaml): 如何通过 CI 配置 Lint/Test
+-   [build.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/.github/workflows/build.yaml): 如何利用 CI Cache
+-   [ci-env.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/.github/workflows/ci-env.yaml): 如何通过 CI 查看 Github Actions 的环境变量
+-   [preview.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/.github/workflows/preview.yaml): 如何通过 CI 进行自动 Preview
+-   [stop-preview.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/.github/workflows/stop-preview.yaml): 如何通过 CI 自动停止 Preview
+-   [production.yaml](https://github.com/shfshanyue/cra-deploy/blob/master/.github/workflows/production.yaml): 如何通过 CI 进行自动部署 (CD)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### [](https://github.com/shfshanyue/cra-deploy#npm-scripts)npm scripts
 
-### `npm run build`
+```
+{
+  "scripts": {
+    // 通过 ossutil 上传至 OSS
+    "oss:cli": "",
+    // 通过 rclone 上传至 OSS
+    "oss:rclone": "",
+    // 通过脚本命令上传至 OSS
+    "oss:script": "node scripts/uploadOSS.mjs",
+    // 通过脚本命令与定时任务自动清理冗余的 OSS 资源
+    "oss:prune": "node scripts/deleteOSS.mjs"
+  },
+}
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## [](https://github.com/shfshanyue/cra-deploy#%E7%AE%80%E5%8D%95%E7%89%88)简单版
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+此版本，已解决了构建缓存，并通过多阶段构建。
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+$ docker-compose up --build simple
+```
 
-### `npm run eject`
+## [](https://github.com/shfshanyue/cra-deploy#%E8%B7%AF%E7%94%B1%E4%BF%AE%E5%A4%8D%E7%89%88)路由修复版
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+此版本，通过 `nginx.conf` 解决了客户端路由的问题。
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+$ docker-compose up --build route
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## [](https://github.com/shfshanyue/cra-deploy#cdnoss-%E7%89%88)CDN/OSS 版
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+此版本，将静态咨询传至 OSS，此时需要提供两个环境变量: `ACCESS_KEY_ID` 与 `ACCESS_KEY_SECRET`。
 
-## Learn More
+```
+$ docker-compose up --build oss
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## [](https://github.com/shfshanyue/cra-deploy#preview-%E7%89%88)Preview 版
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+当往分支 feature-xxx 提交代码时，将会自动部署一个供该分支测试的地址: `feature-xxx.cra.shanyue.tech`
 
-### Code Splitting
+**Preview**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```
+$ cat preview.docker-compose.yaml | COMMIT_REF_NAME=$(git rev-parse --abbrev-ref HEAD) envsubst > temp.docker-compose.yaml
 
-### Analyzing the Bundle Size
+$ docker-compose -f temp.docker-compose.yaml up --build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+**Stop Preview**
 
-### Making a Progressive Web App
+```
+$ cat preview.docker-compose.yaml | COMMIT_REF_NAME=$(git rev-parse --abbrev-ref HEAD) envsubst > temp.docker-compose.yaml
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+$ docker-compose stop
+```
 
-### Advanced Configuration
+## [](https://github.com/shfshanyue/cra-deploy#kubernetes-%E7%89%88)kubernetes 版
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```
+$ kubectl apply -f k8s-app.yaml
+```
 
-### Deployment
+## [](https://github.com/shfshanyue/cra-deploy#k8s-preview-%E7%89%88)k8s Preview 版
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```
+$ cat k8s-preview-app.yaml | COMMIT_REF_NAME=$(git rev-parse --abbrev-ref HEAD) envsubst > temp.k8s-app.yaml
 
-### `npm run build` fails to minify
+$ kubectl apply -f temp.k8s-app.yaml
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+项目为学习 github.com/shfshanyue 部署项目, 过程出现的问题都解决了
