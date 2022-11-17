@@ -19,6 +19,7 @@
     "dev": "dotenv -e .env react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
+    "test": "react-scripts test",
     "oss:cli": "ossutil cp -rf --meta Cache-Control:no-cache build oss://zhangkaiyu-dev/ && ossutil cp -rf --meta Cache-Control:max-age=31536000 build/static oss://zhangkaiyu-dev/static",
     "oss:rclone": "rclone copy --exclude 'static/**' --header 'Cache-Control: no-cache' build alioss:/zhangkaiyu-dev --progress && rclone copy --header 'Cache-Control: max-age=31536000' build/static alioss:/zhangkaiyu-dev/static --progress",
     "oss:script": "node scripts/uploadOSS.mjs",
