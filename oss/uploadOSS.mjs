@@ -9,8 +9,8 @@ const queue = new PQueue({ concurrency: 10 }) // 控制 n 个文件同时上传
 const client = new OSS({
   region: 'oss-cn-wulanchabu',
   // 阿里 accessKeyId , accessKeySecret
-  // accessKeyId: process.env.ACCESS_KEY_ID, 
-  // accessKeySecret: process.env.ACCESS_KEY_SECRET,
+  accessKeyId: 'LTAI5tH3ANRxFj4T4HhDsAtw', 
+  accessKeySecret: 'cVFehQahqjQyUfQUQRGaHBDdmsuGRh',
   bucket: 'zhangkaiyu-dev'
 })
 
@@ -56,8 +56,13 @@ async function main() {
   }
   // 上传携带 hash 的文件
   for await (const entry of readdirp('./build/static', { type: 'files' })) {
-    queue.add(() => uploadFile(`static/${entry.path}`, true))
-    // uploadFile(`static/${entry.path}`, true)
+    if (entry.path.indexOf('\\') > -1) {
+      queue.add(() => uploadFile(`static/${entry.path.split('\\').join('/')}`, true))
+    } else {
+      queue.add(() => uploadFile(`static/${entry.path}`, true))
+    }
+    // queue.add(() => uploadFile(`static/${entry.path}`, true))
+    // uploadFile(`static/${entry.path}`, tr
   }
 }
 

@@ -62,7 +62,7 @@
   },
   "scripts": {
     "serve:build": "serve -s build",
-    "dev": "dotenv -e .env node scripts/start.js",
+    "dev": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "oss:cli": "ossutil cp -rf --meta Cache-Control:no-cache build oss://zhangkaiyu-dev/ && ossutil cp -rf --meta Cache-Control:max-age=31536000 build/static oss://zhangkaiyu-dev/static",
